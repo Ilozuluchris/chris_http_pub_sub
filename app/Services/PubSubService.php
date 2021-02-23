@@ -9,13 +9,11 @@ class PubSubService
 
     public function __construct()
     {
-        $this->redis_client = new Predis\Client();
+        $this->redis_client = new Predis\Client(getenv('REDIS_URL'));
 
         try {
-            //todo make redis url environment variable
             $this->redis_client->connect();
         } catch (Predis\Connection\ConnectionException $exception) {
-            // We could not connect to Redis! Your handling code goes here.
             throw  $exception;
         }
 
