@@ -13,11 +13,10 @@ class PubSubController extends Controller
         //
     }
 
-    //
 
     public function publish(Request $request, string $topic){
-        $msg = json_encode($request->post());
-        return $this->pubSubService->publish($topic, $msg);
+        $msg_data = $request->post();
+        return $this->pubSubService->publish($topic, $msg_data);
 
     }
 
@@ -28,8 +27,9 @@ class PubSubController extends Controller
     }
 
     public function consume(Request $request){
-        $subscriber = $request->fullUrl();
-        return $this->pubSubService->consume($subscriber);
+        $subscriber = $request->url();
+        $re_consume = (bool) $request->input('reconsume');
+        return $this->pubSubService->consume($subscriber, $re_consume);
 
     }
 
