@@ -20,4 +20,4 @@ $router->get('/', function () use ($router) {
 
 $router->post('/publish/{topic}', 'PubSubController@publish');
 $router->post('/subscribe/{topic}', 'PubSubController@subscribe');
-
+$router->get('/{any:.*}', 'PubSubController@consume');

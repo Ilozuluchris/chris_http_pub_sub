@@ -16,7 +16,7 @@ class PubSubController extends Controller
     //
 
     public function publish(Request $request, string $topic){
-        $msg = $request->post();
+        $msg = json_encode($request->post());
         return $this->pubSubService->publish($topic, $msg);
 
     }
@@ -26,4 +26,11 @@ class PubSubController extends Controller
         return $this->pubSubService->subscribe($topic, $subscriber);
 
     }
+
+    public function consume(Request $request){
+        $subscriber = $request->fullUrl();
+        return $this->pubSubService->consume($subscriber);
+
+    }
+
 }
