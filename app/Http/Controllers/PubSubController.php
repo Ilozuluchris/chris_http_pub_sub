@@ -21,7 +21,7 @@ class PubSubController extends Controller
     }
 
     public function subscribe(Request $request, string $topic){
-        $subscriber = $request->post('url'); // would not work with the current testing route because the content-type header is missing
+        $subscriber = $request->post('url'); // would not work with the current testing setup in the assignment because the content-type header is missing
         return $this->pubSubService->subscribe($topic, $subscriber);
 
     }

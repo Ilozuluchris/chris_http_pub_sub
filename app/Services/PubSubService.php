@@ -4,6 +4,11 @@ namespace App\Services;
 
 use Predis;
 
+/***
+ * Class PubSubService
+ *  Responsible for the actual pub/sub, it uses redis to achieve this.
+ * @package App\Services
+ */
 class PubSubService
 {
 
@@ -20,7 +25,11 @@ class PubSubService
     }
 
     public function publish(string $topic, $msg_data){
-        //todo add time to live for message
+        /***
+         * Publishes a message to a topic by adding to a list for that topic
+         */
+        //todo add time to live for message or for clean up run a command every minute or s0
+        // since ideally pub/sub infrastructure do not store messages forever
         try{
            $lid = $this->redis_client->llen($topic);
            $msg = json_encode(['data'=>$msg_data, 'msg_id'=>$lid]);
@@ -44,34 +53,33 @@ class PubSubService
         return ['status'=> $subscriber . ' has subscribed to ' . $topic];
     }
 
-    //todo for clean up run a command every minute or s0
     public function consume($subscriber, bool $reconsume_from_begining=False){
-        // should this be a websocket or js thing
-        //get messages
+        /**
+         * Get topics subscriber has subscribed to, then get messages in those topics
+         */
         $messages=[];
         $subscribed_topics = $this->redis_client->lrange($subscriber, 0, -1);
 
 
         foreach ($subscribed_topics as $i=>$topic) {
 
-            $messages[$topic]= $this->getSubMessageForTopic($topic, $subscriber, $reconsume_from_begining);
+            $messages[$topic]= $this->getMessages($topic, $subscriber, $reconsume_from_begining);
 
         }
 
         return $messages;
     }
 
-    private function getSubMessageForTopic($topic, $subscriber, $reconsume){
+    private function getMessages($topic, $subscriber, $reconsume){
         $start = $reconsume ? 0: $this->getLastConsumedMsgId($topic, $subscriber)+1;
         $msgs = $this->redis_client->lrange($topic,  $start, -1);
         $result = [];
 
-        //todo maybe while loop better here so last item is not accessed twice
         foreach($msgs as $i=>$msg){
             array_push($result, json_decode($msg, true)['data']);
         }
 
-        // Sometimes there is no new message to consume.
+        // Sometimes there is no new message in the topics to consume.
         if (!empty($msgs)){
             $this->setLastConsumedMsgId($topic, $subscriber, $msgs[array_key_last($msgs)]);
         }
@@ -88,15 +96,18 @@ class PubSubService
             $msg_id = $last_consumed_array[$subscriber][$topic];
         }
         catch (\Exception $e){
-            // if no consumption has happened before start consuming from the  beginning
+            // if no consumption has happened before, start consuming from the beginning
             return 0;
         }
 
         return $msg_id;
     }
 
-    private function setLastConsumedMsgId($topic, $subscriber, $last_msg)
-    {
+    private function setLastConsumedMsgId($topic, $subscriber, $last_msg){
+        /***
+         * Save the last consumed message via its msg_id,
+         * so previously consumed messages are not consumed again.
+         */
         $last_msg_id =  json_decode($last_msg, true)['msg_id'];
         $last_consumed_array = json_decode($this->redis_client->get('last_consumed'), true);
         $last_consumed_array[$subscriber][$topic] = $last_msg_id;
