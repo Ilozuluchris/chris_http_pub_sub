@@ -1,24 +1,15 @@
-# Lumen PHP Framework
+# Introduction
+This project is an attempt to replicate pub/sub functionality using HTTP.  
+It was built using PHP8, [Lumen](https://lumen.laravel.com/docs) and redis. It was tested on Ubuntu 20.04
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://img.shields.io/packagist/dt/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://img.shields.io/packagist/v/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://img.shields.io/packagist/l/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+## Setup
+- Install docker and confirm you do not need super user privileges to use it
 
-## Official Documentation
-
-Documentation for the framework can be found on the [Lumen website](https://lumen.laravel.com/docs).
-
-## Contributing
-
-Thank you for considering contributing to Lumen! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Lumen, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Testing
+- Run `./start-server.sh` to start the server
+- Run `curl -X POST -H 'Content-Type: Application/json'  -d '{"url":"http://localhost:8000/event"}' http://localhost:8000/subscribe/topic1` to subscribe `http://localhost:8000/event` to `topic1`
+- Run `curl -X POST -H "Content-Type: application/json" -d '{"message": "hello"}' http://localhost:8000/publish/topic1` to publish a message to topic `topic1`
+- Run `curl http://localhost:8000/event` or [visit in the browser](http://localhost:8000/event) to print(consume) messages that `http://localhost:8000/event` has received
+- Note: Once messages are printed(consumed) they can not be consumed again. To consume again, make a curl call to `http://localhost:8000/event?reconsume=true` or [visit in the browser](http://localhost:8000/event?reconsume=true)
+- Side note: viewing in the browser renders the data better :) 
