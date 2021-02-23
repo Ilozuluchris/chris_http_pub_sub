@@ -79,7 +79,7 @@ class PubSubService
             array_push($result, json_decode($msg, true)['data']);
         }
 
-        // Sometimes there is no new message in the topics to consume.
+        // Sometimes there is no new message in the topic to consume.
         if (!empty($msgs)){
             $this->setLastConsumedMsgId($topic, $subscriber, $msgs[array_key_last($msgs)]);
         }
